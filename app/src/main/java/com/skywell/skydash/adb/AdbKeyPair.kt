@@ -17,9 +17,14 @@ import javax.crypto.Cipher
 class AdbKeyPair(val privateKey: PrivateKey, val publicKeyBytes: ByteArray) {
 
     fun signToken(token: ByteArray): ByteArray {
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, privateKey)
-        return cipher.doFinal(token)
+    val prefix = byteArrayOf(
+        0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e,
+        0x03, 0x02, 0x1a, 0x05, 0x00, 0x04, 0x14
+    )
+    val combined = prefix + token
+    val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+    cipher.init(Cipher.ENCRYPT_MODE, privateKey)
+    return cipher.doFinal(combined)
     }
 
     fun getPublicKeyBase64(): String {
