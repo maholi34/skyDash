@@ -29,9 +29,17 @@ class LocalAdbClient(private val context: Context) {
     private var isConnected = false
 
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
+        // Don't reconnect if already connected
+        if (isConnected && socket?.isConnected == true) {
+            return@withContext true
+        }
+
+        // Clean up any stale connection
+        disconnect()
+
         try {
             socket = Socket(HOST, PORT)
-            socket?.soTimeout = 10000 // 10s timeout
+            socket?.soTimeout = 30000 // 30s timeout — user needs time to approve RSA dialog
             inputStream = socket?.getInputStream()
             outputStream = socket?.getOutputStream()
 
@@ -40,21 +48,21 @@ class LocalAdbClient(private val context: Context) {
             val cnxnMsg = AdbProtocol.AdbMessage(A_CNXN, AdbProtocol.CONNECT_VERSION, AdbProtocol.MAX_PAYLOAD, cnxnData)
             writeMessage(cnxnMsg)
 
-            // 2. Read CNXN or AUTH
+            // 2. Read response (CNXN or AUTH)
             var header = readExactly(24)
             var msg = AdbProtocol.parseHeader(header)
             
+            // Read payload if present
+            var payload: ByteArray? = null
             if (msg.dataLength > 0) {
-                readExactly(msg.dataLength) // Discard initial payload
+                payload = readExactly(msg.dataLength)
             }
 
             val keyPair = AdbKeyPair.getOrGenerate(context)
 
             if (msg.command == A_AUTH) {
-                // We need authentication
-                // A_AUTH has arg0 = 1 (Token), arg1 = 0
-                // Payload is the token to sign
-                val token = readExactly(msg.dataLength)
+                // A_AUTH arg0=1 means Token — payload contains the 20-byte token to sign
+                val token = payload ?: throw IllegalStateException("AUTH token payload is null")
 
                 // Try RSA Signature authentication (arg0 = 2)
                 val sig = keyPair.signToken(token)

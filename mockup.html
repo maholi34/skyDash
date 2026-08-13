@@ -40,18 +40,19 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
     }
 
-    /* Tablet Frame (1786x960 Aspect Ratio) */
+    /* Tablet Frame — fills entire screen */
     .tablet-frame {
-      width: 100%;
-      max-width: 1400px;
-      aspect-ratio: 1786 / 960;
+      width: 100vw;
+      height: 100vh;
       background: var(--bg-dark);
-      border-radius: 20px;
-      border: 3px solid #1E293D;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px rgba(90, 216, 194, 0.06);
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
       display: flex;
       flex-direction: column;
       overflow: hidden;

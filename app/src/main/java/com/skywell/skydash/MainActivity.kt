@@ -59,7 +59,11 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    Log.i("MainActivity", "WebView finished loading assets/index.html")
+                    Log.i("MainActivity", "WebView finished loading. Now starting vehicle service.")
+                    // Start ADB service AFTER UI is ready (prevents white screen)
+                    val intent = Intent(this@MainActivity, VehicleDataService::class.java)
+                    startService(intent)
+                    bindService(intent, connection, Context.BIND_AUTO_CREATE)
                 }
             }
             
@@ -69,11 +73,6 @@ class MainActivity : AppCompatActivity() {
         }
         
         setContentView(webView)
-
-        // Start and Bind to background vehicle service
-        val intent = Intent(this, VehicleDataService::class.java)
-        startService(intent)
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
     
     override fun onResume() {

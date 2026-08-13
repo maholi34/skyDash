@@ -109,11 +109,7 @@ class VehicleDataService : Service() {
                     val hvacData = HvacProvider.queryHvac(this@VehicleDataService)
 
                     // 2. Query VehicleHAL dumpsys via LocalADB
-                    val rawData = if (adbClient.connect()) {
-                        adbClient.executeCommand("dumpsys car_service")
-                    } else {
-                        ""
-                    }
+                    val rawData = adbClient.executeCommand("dumpsys car_service")
 
                     // 3. Parse snapshot (if rawData is empty, parser uses defaults/hvacData)
                     val snapshot = CarServiceParser.parse(rawData, hvacData)

@@ -54,10 +54,10 @@ object CarServiceParser {
         var range = 0
         var chargeState = 0
         var ignitionState = 0
-        var insideTemp = 22.0f
-        var outsideTemp = 18.0f
-        var hvacFanSpeed = 1
-        var regenLevel = 50 // Comfort rejen level default
+        var insideTemp = 0.0f
+        var outsideTemp = 0.0f
+        var hvacFanSpeed = 0
+        var regenLevel = 0 // Default changed to 0 to indicate failure
 
         // Regex pattern to extract value inside brackets [val] or raw numbers
         val bracketPattern = Pattern.compile("\\[([\\d.-]+)\\]")
@@ -130,14 +130,14 @@ object CarServiceParser {
 
         // Apply fallback for SOC if main SOC wasn't parsed
         if (soc == -1) {
-            soc = if (socBackup != -1) socBackup else 78
+            soc = if (socBackup != -1) socBackup else 0
         }
 
         // Blend with ContentProvider HVAC details if available
         val finalInsideTemp = hvacData?.insideTemp ?: insideTemp
         val finalOutsideTemp = hvacData?.outsideTemp ?: outsideTemp
         val finalHvacFanSpeed = hvacData?.fanSpeed ?: hvacFanSpeed
-        val targetTemp = hvacData?.targetTemp ?: 22.0f
+        val targetTemp = hvacData?.targetTemp ?: 0.0f
         val autoHvac = hvacData?.auto ?: false
         val powerHvac = hvacData?.power ?: false
 
