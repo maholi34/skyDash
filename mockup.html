@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyDash — Skywell ET5 Kokpit Görsel Mockup (v3)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0A0F1C;
+      --panel-bg: #111928;
+      --panel-border: #1E293B;
+      --accent-teal: #5AD8C2;
+      --accent-amber: #F0A857;
+      --accent-blue: #3B82F6;
+      --text-main: #ECF1F8;
+      --text-muted: #8E9BAE;
+      --text-sub: #526075;
+      --danger-red: #EF4444;
+      --font-ui: 'Outfit', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: #030712;
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Tablet Frame (1786x960 Aspect Ratio) */
+    .tablet-frame {
+      width: 100%;
+      max-width: 1400px;
+      aspect-ratio: 1786 / 960;
+      background: var(--bg-dark);
+      border-radius: 20px;
+      border: 3px solid #1E293D;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px rgba(90, 216, 194, 0.06);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Top Status Bar */
+    .top-bar {
+      height: 48px;
+      background: rgba(17, 25, 40, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-left, .status-right, .status-center {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .badge-teal {
+      color: var(--accent-teal);
+      border-color: rgba(90, 216, 194, 0.3);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-teal);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-teal);
+    }
+
+    /* App Body */
+    .app-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Left Nav Rail */
+    .nav-rail {
+      width: 84px;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 24px;
+    }
+
+    .nav-item {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: none;
+      gap: 4px;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .nav-item span {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .nav-item:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-item.active {
+      color: var(--accent-teal);
+      background: rgba(90, 216, 194, 0.1);
+      border: 1px solid rgba(90, 216, 194, 0.25);
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .screen-view {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .screen-view.active {
+      display: flex;
+    }
+
+    /* Dashboard Layout Grid (3 Equal Columns) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr 360px;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Left Card: Battery & Cell Info */
+    .battery-circle-container {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+      margin: 6px 0;
+    }
+
+    .battery-value {
+      font-family: var(--font-mono);
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--accent-teal);
+      line-height: 1;
+    }
+
+    .stat-group {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .stat-val {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Center Card: Modes, Steering & Integrated Regen */
+    .modes-card {
+      align-items: center;
+      justify-content: space-between;
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 0.4) 0%, var(--panel-bg) 75%);
+      text-align: center;
+    }
+
+    .mode-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-big-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      font-weight: 700;
+    }
+
+    .mode-big-value {
+      font-family: var(--font-mono);
+      font-size: 44px;
+      font-weight: 800;
+      color: var(--accent-amber);
+      line-height: 1;
+    }
+
+    .regen-earned-box {
+      background: rgba(240, 168, 87, 0.12);
+      border: 1px solid rgba(240, 168, 87, 0.3);
+      color: var(--accent-amber);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .steering-selector {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .steering-btn {
+      flex: 1;
+      padding: 10px 0;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .steering-btn.active {
+      background: rgba(90, 216, 194, 0.15);
+      color: var(--accent-teal);
+      border-color: var(--accent-teal);
+      box-shadow: 0 0 12px rgba(90, 216, 194, 0.2);
+    }
+
+    .power-bar-container {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Right Card: HVAC & Both Seats */
+    .hvac-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hvac-box {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .seats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .seat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .seat-box.active {
+      border-color: var(--accent-amber);
+      background: rgba(240, 168, 87, 0.08);
+    }
+
+    /* Bottom Trip Summary Strip */
+    .bottom-strip {
+      height: 76px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    .strip-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .strip-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .strip-val {
+      font-family: var(--font-mono);
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .real-badge {
+      font-size: 9px;
+      background: rgba(90, 216, 194, 0.2);
+      color: var(--accent-teal);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .screen-header {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .trips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      height: 100%;
+    }
+    .trip-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+    }
+    .btn-reset:active {
+      transform: scale(0.98);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+      z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: var(--bg-dark);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 1000px;
+      height: 80%;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 1);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .chart-container {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+    .list-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+      gap: 16px;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      align-items: center;
+      font-size: 14px;
+    }
+    .list-row:hover { background: rgba(255,255,255,0.02); }
+    .list-header {
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+    .btn-view-graph {
+      background: rgba(90, 216, 194, 0.15);
+      border: 1px solid var(--accent-teal);
+      color: var(--accent-teal);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tablet Frame Simulation -->
+  <div class="tablet-frame">
+    
+    <!-- Top Status Bar (FIX 1: Tarih ve Saat eklendi) -->
+    <div class="top-bar">
+      <div class="status-left">
+        <div class="badge badge-teal">
+          <div class="pulse-dot"></div>
+          <span id="top-soc">⚡ %78 SOC</span>
+        </div>
+        <div class="badge" style="border-color: rgba(255, 255, 255, 0.15);">
+          <span style="color: var(--text-muted);">Menzil:</span> 
+          <strong id="top-range" style="color:var(--text-main);">420 km</strong>
+        </div>
+      </div>
+
+      <!-- FIX 1: TARİH VE SAAT -->
+      <div class="status-center">
+        <span id="top-date" style="font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--accent-amber);">12 AĞUSTOS 2026</span>
+        <span style="color: var(--text-muted);">|</span>
+        <span id="top-time" style="font-family: var(--font-mono); font-weight: 700; font-size: 16px; color: var(--text-main);">14:32</span>
+      </div>
+
+      <div class="status-right">
+        <div id="top-adb" class="badge" style="color: var(--accent-teal);">LocalADB OK</div>
+      </div>
+    </div>
+
+    <!-- App Body -->
+    <div class="app-body">
+      
+      <!-- Left Navigation Rail -->
+      <div class="nav-rail">
+        <button class="nav-item active" onclick="switchTab('dashboard', this)">
+          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"/></svg>
+          <span>Kokpit</span>
+        </button>
+
+        <button class="nav-item" onclick="switchTab('trip', this)">
+          <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+          <span>Sürüş</span>
+        </button>
+
+        <button class="nav-item" onclick="switchTab('charges', this)">
+          <svg viewBox="0 0 24 24"><path d="M11.67 3.87L9.9 2.1 0 12l9.9 9.9 1.77-1.77L3.54 12zM15 9h5v6h-5z"/></svg>
+          <span>Şarjlar</span>
+        </button>
+
+        <button class="nav-item" onclick="switchTab('settings', this)">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>Ayarlar</span>
+        </button>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="content-area">
+        
+        <!-- SCREEN 1: KOKPİT (DASHBOARD) -->
+        <div id="screen-dashboard" class="screen-view active">
+          
+          <div class="dashboard-grid">
+            
+            <!-- Left Card: Battery & Cell Info (FIX 2: Net Kapasite & Batarya Sıcaklığı) -->
+            <div class="card">
+              <div class="card-title">
+                <span>BATARYA & HÜCRE SAĞLIĞI</span>
+                <span style="color:var(--text-sub); font-size:10px;">NET KAPASİTE: 68 kWh</span>
+              </div>
+
+              <div class="battery-circle-container">
+                <div id="bat-soc" class="battery-value">%78</div>
+                <div style="font-size:14px; color:var(--text-muted); font-weight:600;">SOC</div>
+              </div>
+
+              <!-- FIX 2: Batarya Sıcaklığı Netleşti -->
+              <div class="stat-group">
+                <div class="stat-row">
+                  <span style="color:var(--text-muted);">Batarya Ort. Sıcaklığı</span>
+                  <span id="bat-temp" class="stat-val" style="color:var(--accent-teal);">24.2 °C</span>
+                </div>
+                <div class="stat-row">
+                  <span style="color:var(--text-muted);">Hücre Sıcaklığı (Min / Max)</span>
+                  <span id="bat-temp-minmax" class="stat-val">23.5°C / 25.0°C</span>
+                </div>
+              </div>
+
+              <!-- Cell Voltage mV Difference -->
+              <div class="stat-group">
+                <div class="stat-row">
+                  <span style="color:var(--text-muted);">Hücre Farkı (Δ Voltaj)</span>
+                  <span id="cell-diff" class="stat-val" style="color:var(--accent-teal);">12 mV</span>
+                </div>
+                <div class="stat-row">
+                  <span style="color:var(--text-muted);">Hücre Voltajı (Min / Max)</span>
+                  <span id="cell-volts-minmax" class="stat-val">3.840V / 3.852V</span>
+                </div>
+              </div>
+
+              <!-- Remaining Energy -->
+              <div class="stat-group">
+                <div class="stat-row">
+                  <span style="color:var(--text-muted);">Kalan Enerji</span>
+                  <span id="rem-energy" class="stat-val">53.0 kWh</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Center Card: Modes, Steering & INTEGRATED REJEN (FIX 4: Kırmızı Ok Eşleşmesi) -->
+            <div class="card modes-card">
+              
+              <div class="mode-section">
+                <div class="mode-big-title">⚡ AKTİF REJEN FRENLEME GÜCÜ</div>
+                <div id="regen-power" class="mode-big-value">%50</div>
+              </div>
+              
+              <div class="mode-section" style="margin-top: -4px;">
+                <div class="mode-big-title" style="color: var(--accent-amber);">🔋 REJEN İLE KAZANILAN</div>
+                <div id="regen-gained" class="mode-big-value" style="color: var(--accent-amber);">+1.8<span style="font-size: 22px; margin-left: 6px; color: rgba(255, 255, 255, 0.4);">kWh</span></div>
+              </div>
+
+              <!-- Steering Mode Selector -->
+              <div class="mode-section" style="gap:10px;">
+                <div class="mode-big-title">🎯 DİREKSİYON SERTLİK MODU</div>
+                <div class="steering-selector">
+                  <div id="steering-comfort" class="steering-btn">COMFORT</div>
+                  <div id="steering-standard" class="steering-btn">STANDARD</div>
+                  <div id="steering-sport" class="steering-btn">SPORT</div>
+                </div>
+              </div>
+
+              <!-- Live Power Flow Bar -->
+              <div class="power-bar-container">
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-bottom:6px;">
+                  <span>Rejen (-30 kW)</span>
+                  <span id="instant-power" style="font-weight:700; color:var(--text-main);">Anlık Güç: +14.2 kW</span>
+                  <span>Tüketim (+90 kW)</span>
+                </div>
+                <div style="height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; position:relative;">
+                  <div id="power-bar-fill" style="position:absolute; left:50%; width:0%; height:100%; background:var(--accent-teal); border-radius:4px;"></div>             <!-- Right Card: HVAC & Both Seats (FIX 3: İÇ / DIŞ SICAKLIK Sadeleştirildi) -->
+            <div class="card">
+              <div class="card-title">
+                <span>KABİN & İKLİM / KOLTUKLAR</span>
+                <span id="hvac-auto-badge" style="background:rgba(90,216,194,0.15); color:var(--accent-teal); padding:2px 8px; border-radius:4px; font-size:10px;">AUTO AÇIK</span>
+              </div>
+
+              <div class="hvac-grid">
+                <div class="hvac-box">
+                  <span style="font-size:10px; color:var(--text-muted);">HEDEF SICAKLIK</span>
+                  <span id="hvac-target" style="font-family:var(--font-mono); font-size:24px; font-weight:800; color:var(--accent-teal);">22.0°C</span>
+                </div>
+                
+                <!-- FIX 3: "MEVCUT" kelimesi çıkarıldı, sadeleşti -->
+                <div class="hvac-box">
+                  <span style="font-size:10px; color:var(--text-muted);">İÇ / DIŞ SICAKLIK</span>
+                  <span id="cabin-temps" style="font-family:var(--font-mono); font-size:16px; font-weight:700; color:var(--text-main);">22.5°C / 18.0°C</span>
+                </div>
+              </div>
+
+              <div class="stat-row" style="margin-top:2px;">
+                <span style="color:var(--text-muted);">Fan Seviyesi</span>
+                <span id="hvac-fan" class="stat-val" style="color:var(--accent-teal);">4 / 7 (Otomatik)</span>
+              </div>
+
+              <div style="font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:0.5px; margin-top:4px;">KOLTUK KONFORU (HER İKİ KOLTUK)</div>
+              
+              <div class="seats-grid">
+                <!-- Driver Seat -->
+                <div class="seat-box active">
+                  <div style="font-size:11px; font-weight:700; color:var(--text-main);">👨‍✈️ SÜRÜCÜ</div>
+                  <div style="font-size:11px; color:var(--accent-amber);">Isıtma: Kademe 2</div>
+                  <div style="font-size:11px; color:var(--text-sub);">Soğutma: Kapalı</div>
+                </div>
+
+                <!-- Co-Pilot Seat -->
+                <div class="seat-box">
+                  <div style="font-size:11px; font-weight:700; color:var(--text-main);">👨‍💼 YARDIMCI PİLOT</div>
+                  <div style="font-size:11px; color:var(--text-sub);">Isıtma: Kapalı</div>
+                  <div style="font-size:11px; color:var(--accent-teal);">Soğutma: Kademe 1</div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Trip Summary Strip (FIX 4: Rejen yukarı taşındı, buraya Sürüş Süresi eklendi) -->
+          <div class="bottom-strip">
+            <div class="strip-item">
+              <span class="strip-label">Son Sürüş Mesafesi</span>
+              <span id="strip-distance" class="strip-val">34.2 km</span>
+            </div>
+            <div class="strip-item">
+              <span class="strip-label">Sürüş Süresi</span>
+              <span id="strip-duration" class="strip-val">42 Dk</span>
+            </div>
+            <div class="strip-item">
+              <span class="strip-label">Net Harcanan Enerji</span>
+              <span id="strip-energy" class="strip-val">5.44 kWh</span>
+            </div>
+            <div class="strip-item">
+              <span class="strip-label">Gerçekleşen Ortalama Tüketim <span class="real-badge">GERÇEK HESAP</span></span>
+              <span id="strip-avg" class="strip-val" style="color:var(--accent-teal);">15.9 kWh/100km</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN 2: SÜRÜŞ & ŞARJ (TRIPS) -->
+        <div id="screen-trip" class="screen-view">
+          <div class="trips-grid">
+            
+            <!-- TRIP A -->
+            <div class="card trip-col">
+              <div class="card-title">
+                <span>TRIP A (SON)</span>
+                <span style="color:var(--text-sub); font-size:10px;">Araç çalışıp kapanınca geçen durum</span>
+              </div>
+              <div class="btn-reset" onclick="resetTrip('A')">A Sıfırla</div>
+              
+              <div class="stat-row"><span style="color:var(--text-muted);">Mesafe</span><span id="tripa-distance" class="stat-val">10.52 km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Tüketim (Yüzde)</span><span id="tripa-soc" class="stat-val">0.1%</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Klima Tüketimi</span><span id="tripa-ac" class="stat-val">0.04 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Sürüş Tüketimi</span><span id="tripa-drive" class="stat-val">0.00 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Toplam Tüketim</span><span id="tripa-total" class="stat-val">0.04 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Maliyet</span><span id="tripa-cost" class="stat-val">0.57 TL</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Km Başı Maliyet</span><span id="tripa-cost-per-km" class="stat-val">0.05 TL/km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Ortalama (Gerçek)</span><span id="tripa-avg" class="stat-val" style="color:var(--accent-teal);">15.9 kWh/100km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Ortalama Hız</span><span id="tripa-avg-speed" class="stat-val">45.0 km/h</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Aktif Süre</span><span id="tripa-active-time" class="stat-val">0 sa 14 dk</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Park Süre</span><span id="tripa-park-time" class="stat-val">0 sa 46 dk</span></div>
+            </div>
+
+            <!-- TRIP B -->
+            <div class="card trip-col">
+              <div class="card-title">
+                <span>TRIP B (ÖNCEKİ)</span>
+                <span style="color:var(--text-sub); font-size:10px;">Sıfırlanana kadar olan tüm yolculuk</span>
+              </div>
+              <div class="btn-reset" onclick="resetTrip('B')">B Sıfırla</div>
+              
+              <div class="stat-row"><span style="color:var(--text-muted);">Mesafe</span><span id="tripb-distance" class="stat-val">245.80 km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Tüketim (Yüzde)</span><span id="tripb-soc" class="stat-val">42.5%</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Klima Tüketimi</span><span id="tripb-ac" class="stat-val">4.20 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Sürüş Tüketimi</span><span id="tripb-drive" class="stat-val">34.80 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Toplam Tüketim</span><span id="tripb-total" class="stat-val">39.00 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Maliyet</span><span id="tripb-cost" class="stat-val">78.00 TL</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Km Başı Maliyet</span><span id="tripb-cost-per-km" class="stat-val">0.31 TL/km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Ortalama (Gerçek)</span><span id="tripb-avg" class="stat-val" style="color:var(--accent-teal);">15.8 kWh/100km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Ortalama Hız</span><span id="tripb-avg-speed" class="stat-val">52.4 km/h</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Aktif Süre</span><span id="tripb-active-time" class="stat-val">4 sa 41 dk</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Park Süre</span><span id="tripb-park-time" class="stat-val">12 sa 15 dk</span></div>
+            </div>
+
+            <!-- TRIP C -->
+            <div class="card trip-col">
+              <div class="card-title">
+                <span>TRIP C (TOPLAM)</span>
+                <span style="color:var(--text-sub); font-size:10px;">En büyük toplam (Kullanıcıya özel)</span>
+              </div>
+              <div class="btn-reset" onclick="resetTrip('C')">C Sıfırla</div>
+              
+              <div class="stat-row"><span style="color:var(--text-muted);">Mesafe</span><span id="tripc-distance" class="stat-val">12,450.0 km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Tüketim (Yüzde)</span><span id="tripc-soc" class="stat-val">--</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Klima Tüketimi</span><span id="tripc-ac" class="stat-val">145.2 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Sürüş Tüketimi</span><span id="tripc-drive" class="stat-val">1850.4 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Toplam Tüketim</span><span id="tripc-total" class="stat-val">1995.6 kWh</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Maliyet</span><span id="tripc-cost" class="stat-val">3,991.20 TL</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Km Başı Maliyet</span><span id="tripc-cost-per-km" class="stat-val">0.32 TL/km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Ortalama (Gerçek)</span><span id="tripc-avg" class="stat-val" style="color:var(--accent-teal);">16.0 kWh/100km</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Ortalama Hız</span><span id="tripc-avg-speed" class="stat-val">48.2 km/h</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Aktif Süre</span><span id="tripc-active-time" class="stat-val">258 sa 10 dk</span></div>
+              <div class="stat-row"><span style="color:var(--text-muted);">Park Süre</span><span id="tripc-park-time" class="stat-val">--</span></div>
+            </div>
+
+          </div>
+          
+          <!-- Geçmiş Sürüşler Listesi -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-title">GEÇMİŞ SÜRÜŞLER (KARA KUTU)</div>
+            <div class="list-row list-header">
+              <div>Tarih</div>
+              <div>Mesafe</div>
+              <div>Süre</div>
+              <div>Tüketim</div>
+              <div>Ortalama</div>
+              <div>Aksiyon</div>
+            </div>
+            <div id="past-trips-list">
+              <div class="list-row">
+                <div>12 Ağustos 2026 - 10:15</div>
+                <div>10.5 km</div>
+                <div>14 Dk</div>
+                <div>1.6 kWh</div>
+                <div style="color:var(--accent-teal);">15.2 kWh/100km</div>
+                <button class="btn-view-graph" onclick="openChart('trip')">📊 Grafikleri Aç</button>
+              </div>
+              <div class="list-row">
+                <div>11 Ağustos 2026 - 18:30</div>
+                <div>42.0 km</div>
+                <div>55 Dk</div>
+                <div>6.5 kWh</div>
+                <div style="color:var(--accent-teal);">15.5 kWh/100km</div>
+                <button class="btn-view-graph" onclick="openChart('trip')">📊 Grafikleri Aç</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN 5: ŞARJ GEÇMİŞİ -->
+        <div id="screen-charges" class="screen-view">
+          <div class="screen-header">Şarj Döngüleri ve Telemetrisi</div>
+          <div class="card">
+            <div class="list-row list-header">
+              <div>Tarih</div>
+              <div>Tip</div>
+              <div>SOC Farkı</div>
+              <div>Eklenen Enerji</div>
+              <div>Maliyet</div>
+              <div>Aksiyon</div>
+            </div>
+            <div id="past-charges-list">
+              <div class="list-row">
+                <div>10 Ağustos 2026 - 22:00</div>
+                <div style="color:var(--accent-teal);">AC</div>
+                <div>%40 ➔ %100</div>
+                <div>41.5 kWh</div>
+                <div>91.30 TL</div>
+                <button class="btn-view-graph" onclick="openChart('charge')">⚡ Telemetriyi Aç</button>
+              </div>
+              <div class="list-row">
+                <div>08 Ağustos 2026 - 14:15</div>
+                <div style="color:var(--accent-amber);">DC</div>
+                <div>%15 ➔ %80</div>
+                <div>44.2 kWh</div>
+                <div>375.70 TL</div>
+                <button class="btn-view-graph" onclick="openChart('charge')">⚡ Telemetriyi Aç</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN 4: AYARLAR -->
+        <div id="screen-settings" class="screen-view">
+          <div class="screen-header">Ayarlar & Konfigürasyon</div>
+          
+          <div class="card" style="margin-bottom: 16px;">
+            <div class="card-title">Maliyet Hesaplama (Birim Fiyatlar)</div>
+            
+            <div class="stat-row" style="margin-bottom: 12px;">
+              <span style="color:var(--text-muted);">Ev / İş Şarjı (AC) Birim Fiyatı</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="number" value="2.20" step="0.1" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:white; padding:8px; border-radius:6px; width:80px; text-align:right; font-family:var(--font-mono);">
+                <span style="color:var(--text-muted);">TL/kWh</span>
+              </div>
+            </div>
+            
+            <div class="stat-row">
+              <span style="color:var(--text-muted);">Hızlı Şarj (DC) Birim Fiyatı</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="number" value="8.50" step="0.1" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:white; padding:8px; border-radius:6px; width:80px; text-align:right; font-family:var(--font-mono);">
+                <span style="color:var(--text-muted);">TL/kWh</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Sistem Ayarları</div>
+            <div class="stat-row"><span>LocalADB Bağlantı Modu</span><span class="stat-val" style="color:var(--accent-teal);">Otomatik Soket (127.0.0.1:5555)</span></div>
+            <div class="stat-row"><span>Tüketim Hesaplama Mantığı</span><span class="stat-val">Gerçek Fiziki Delta (Şarj Göz Ardı Edilir)</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="chartModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Grafik Detayları</h2>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button class="btn-view-graph" onclick="exportPdf()">📄 PDF Dışa Aktar</button>
+          <button class="btn-close" onclick="closeChart()">✖</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.screen-view').forEach(screen => screen.classList.remove('active'));
+      
+      el.classList.add('active');
+      document.getElementById('screen-' + tabId).classList.add('active');
+    }
+
+    let chartInstance = null;
+
+    function openChart(type) {
+      document.getElementById('chartModal').classList.add('active');
+      const ctx = document.getElementById('myChart').getContext('2d');
+      
+      if(chartInstance) chartInstance.destroy();
+
+      Chart.defaults.color = '#8E9BAE';
+      Chart.defaults.font.family = 'Outfit';
+
+      let config = {};
+
+      if (type === 'trip') {
+        document.getElementById('modalTitle').innerText = "Sürüş Kara Kutusu (Rakım & SOC & Hücre mV Farkı)";
+        config = {
+          type: 'line',
+          data: {
+            labels: ['0', '5', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'],
+            datasets: [
+              {
+                label: 'SOC (%)',
+                data: [78, 77, 75, 73, 72, 70, 68, 65, 64, 62, 60, 58],
+                borderColor: '#5AD8C2',
+                yAxisID: 'y',
+              },
+              {
+                label: 'Rakım (m)',
+                data: [100, 120, 150, 200, 250, 400, 380, 350, 200, 150, 100, 50],
+                borderColor: '#3B82F6',
+                yAxisID: 'y1',
+              },
+              {
+                label: 'Hücre Farkı (mV)',
+                data: [12, 12, 14, 18, 24, 30, 28, 22, 15, 12, 12, 12],
+                borderColor: '#F0A857',
+                yAxisID: 'y2',
+                borderDash: [5, 5]
+              },
+              {
+                label: 'Motor Sıcaklığı (°C)',
+                data: [40, 45, 52, 60, 65, 75, 72, 68, 60, 55, 50, 48],
+                borderColor: '#EF4444',
+                yAxisID: 'y1'
+              },
+              {
+                label: 'Hız (km/h)',
+                data: [0, 45, 60, 80, 110, 120, 100, 70, 50, 30, 10, 0],
+                borderColor: '#8E9BAE',
+                yAxisID: 'y'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { title: { display: true, text: 'Süre (Dakika)' } },
+              y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'SOC % / Hız'} },
+              y1: { type: 'linear', display: true, position: 'right', title: {display: true, text: 'Rakım (m) / Motor Sıcaklığı (°C)'}, grid: {drawOnChartArea: false} },
+              y2: { type: 'linear', display: true, position: 'right', title: {display: true, text: 'Hücre mV Farkı'}, grid: {drawOnChartArea: false} },
+            }
+          }
+        };
+      } else {
+        document.getElementById('modalTitle').innerText = "Şarj Telemetrisi (Şarj Hızı & Batarya Sıcaklığı)";
+        config = {
+          type: 'line',
+          data: {
+            labels: ['0', '10', '20', '30', '40', '50', '60'],
+            datasets: [
+              {
+                label: 'Şarj Gücü (kW)',
+                data: [65, 68, 72, 60, 45, 25, 10],
+                borderColor: '#5AD8C2',
+                backgroundColor: 'rgba(90, 216, 194, 0.2)',
+                fill: true,
+                yAxisID: 'y',
+                tension: 0.4
+              },
+              {
+                label: 'Batarya Sıcaklığı (°C)',
+                data: [25, 28, 32, 35, 36, 34, 30],
+                borderColor: '#EF4444',
+                yAxisID: 'y1',
+                tension: 0.4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { title: { display: true, text: 'Süre (Dakika)' } },
+              y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Güç (kW)'} },
+              y1: { type: 'linear', display: true, position: 'right', title: {display: true, text: 'Sıcaklık (°C)'}, grid: {drawOnChartArea: false} },
+            }
+          }
+        };
+      }
+
+      chartInstance = new Chart(ctx, config);
+    }
+
+    function closeChart() {
+      document.getElementById('chartModal').classList.remove('active');
+    }
+
+    function exportPdf() {
+      // PDF Raporlama için görünür önizleme ve indirme konteyneri
+      const wrapper = document.createElement('div');
+      wrapper.id = 'evdash-pdf-report-wrapper';
+      wrapper.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:flex-start; overflow-y:auto; padding:20px;';
+      
+      wrapper.innerHTML = `
+        <div style="background:#0f172a; border-radius:12px; padding:20px; color:white; width:840px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
+            <div style="font-weight:700; font-size:16px;">📄 Kara Kutu Telemetri PDF Raporu Oluşturuluyor...</div>
+            <button id="close-pdf-preview" style="background:#ef4444; color:white; border:none; padding:6px 14px; border-radius:6px; font-weight:700; cursor:pointer;">Kapat</button>
+          </div>
+          
+          <div id="pdf-content-pages" style="background:#f8fafc; color:#0f172a; width:720px; box-sizing:border-box; margin:0 auto; padding:16px; font-family:'Outfit', sans-serif; border-radius:8px;">
+            
+            <!-- PAGE 1: AYRI GRAFİKLER -->
+            <div class="pdf-page" style="background:#f8fafc; font-family:'Outfit', sans-serif;">
+              <!-- Header -->
+              <div style="background:#0f172a; color:white; padding:18px 24px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                  <h1 style="margin:0; font-size:24px; font-weight:700; color:white; line-height:1.2;">SkyDash — Kara Kutu Telemetri Raporu</h1>
+                  <div style="font-size:13px; opacity:0.8; margin-top:4px;">12 Ağustos 2026 10:15 - 10:29 · Skywell ET5 · 10.5 km</div>
+                </div>
+                <div style="border:1px solid rgba(255,255,255,0.2); padding:8px 14px; border-radius:8px; text-align:right;">
+                  <div style="font-size:14px; font-weight:700; color:white;">SkyDash</div>
+                  <div style="font-size:11px; opacity:0.7;">Telemetri v1.0</div>
+                </div>
+              </div>
+
+              <!-- AYRI GRAFİKLER (AYRI VERSİYONLAR) -->
+              <div style="font-size:13px; font-weight:700; color:#475569; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">KARA KUTU METRİKLERİ (AYRI GRAFİKLER)</div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+                  <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">1. SOC / Batarya Yüzdesi (%)</div>
+                  <div style="height:140px; position:relative;"><canvas id="pdfChartSoc"></canvas></div>
+                </div>
+                <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+                  <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">2. Rakım (m)</div>
+                  <div style="height:140px; position:relative;"><canvas id="pdfChartAltitude"></canvas></div>
+                </div>
+                <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+                  <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">3. Hücre Voltaj Farkı (mV)</div>
+                  <div style="height:140px; position:relative;"><canvas id="pdfChartCellMv"></canvas></div>
+                </div>
+                <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+                  <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">4. Motor Sıcaklığı (°C)</div>
+                  <div style="height:140px; position:relative;"><canvas id="pdfChartMotorTemp"></canvas></div>
+                </div>
+              </div>
+
+              <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">5. Araç Hızı (km/h)</div>
+                <div style="height:140px; position:relative;"><canvas id="pdfChartSpeed"></canvas></div>
+              </div>
+            </div>
+
+            <!-- PAGE BREAK -->
+            <div style="page-break-before:always; height:20px;"></div>
+
+            <!-- PAGE 2: EN ALTTKİ BİRLEŞİK GRAFİK -->
+            <div class="pdf-page" style="background:#f8fafc; font-family:'Outfit', sans-serif;">
+              <div style="font-size:13px; font-weight:700; color:#475569; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px;">BİRLEŞİK KARA KUTU GRAFİĞİ (TÜM METRİKLER)</div>
+              <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+                <div style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:4px;">Tüm Sürüş Parametreleri Zaman Çizelgesi</div>
+                <div style="font-size:12px; color:#64748b; margin-bottom:16px;">SOC, Rakım, Hücre mV Farkı, Motor Sıcaklığı ve Hız Eğrilerinin Karşılaştırılması</div>
+                <div style="height:480px; position:relative;"><canvas id="pdfChartCombined"></canvas></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(wrapper);
+
+      document.getElementById('close-pdf-preview').onclick = function() {
+        if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+      };
+
+      const timeLabels = ['0 Dk', '5 Dk', '10 Dk', '15 Dk', '20 Dk', '25 Dk', '30 Dk', '35 Dk', '40 Dk', '45 Dk', '50 Dk', '55 Dk'];
+
+      const commonLightOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { size: 9 } } },
+          y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { size: 9 } } }
+        }
+      };
+
+      // 1. SOC Grafiği
+      new Chart(document.getElementById('pdfChartSoc'), {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{ data: [78, 77, 75, 73, 72, 70, 68, 65, 64, 62, 60, 58], borderColor: '#10b981', borderWidth: 2, pointRadius: 0, tension: 0.3 }]
+        },
+        options: commonLightOptions
+      });
+
+      // 2. Rakım Grafiği
+      new Chart(document.getElementById('pdfChartAltitude'), {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{ data: [100, 120, 150, 200, 250, 400, 380, 350, 200, 150, 100, 50], borderColor: '#2563eb', borderWidth: 2, pointRadius: 0, tension: 0.3 }]
+        },
+        options: commonLightOptions
+      });
+
+      // 3. Hücre mV Farkı Grafiği
+      new Chart(document.getElementById('pdfChartCellMv'), {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{ data: [12, 12, 14, 18, 24, 30, 28, 22, 15, 12, 12, 12], borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0, tension: 0.3 }]
+        },
+        options: commonLightOptions
+      });
+
+      // 4. Motor Sıcaklığı Grafiği
+      new Chart(document.getElementById('pdfChartMotorTemp'), {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{ data: [40, 45, 52, 60, 65, 75, 72, 68, 60, 55, 50, 48], borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, tension: 0.3 }]
+        },
+        options: commonLightOptions
+      });
+
+      // 5. Hız Grafiği
+      new Chart(document.getElementById('pdfChartSpeed'), {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [{ data: [0, 45, 60, 80, 110, 120, 100, 70, 50, 30, 10, 0], borderColor: '#64748b', borderWidth: 2, pointRadius: 0, tension: 0.3 }]
+        },
+        options: commonLightOptions
+      });
+
+      // 6. Birleşik Kara Kutu Grafiği (Sayfa 2)
+      new Chart(document.getElementById('pdfChartCombined'), {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [
+            { label: 'SOC (%)', data: [78, 77, 75, 73, 72, 70, 68, 65, 64, 62, 60, 58], borderColor: '#10b981', borderWidth: 2, tension: 0.3, yAxisID: 'y' },
+            { label: 'Hız (km/h)', data: [0, 45, 60, 80, 110, 120, 100, 70, 50, 30, 10, 0], borderColor: '#64748b', borderWidth: 2, tension: 0.3, yAxisID: 'y' },
+            { label: 'Rakım (m)', data: [100, 120, 150, 200, 250, 400, 380, 350, 200, 150, 100, 50], borderColor: '#2563eb', borderWidth: 2, tension: 0.3, yAxisID: 'y1' },
+            { label: 'Motor Sıcaklığı (°C)', data: [40, 45, 52, 60, 65, 75, 72, 68, 60, 55, 50, 48], borderColor: '#ef4444', borderWidth: 2, tension: 0.3, yAxisID: 'y1' },
+            { label: 'Hücre Farkı (mV)', data: [12, 12, 14, 18, 24, 30, 28, 22, 15, 12, 12, 12], borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 5], tension: 0.3, yAxisID: 'y2' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
+            y: { position: 'left', title: { display: true, text: 'SOC % / Hız' } },
+            y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Rakım (m) / Motor Sıcaklığı (°C)' } },
+            y2: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Hücre mV Farkı' } }
+          }
+        }
+      });
+
+      // Grafikler çizildikten sonra html2pdf ile PDF kaydı al
+      setTimeout(function() {
+        const pdfContent = document.getElementById('pdf-content-pages');
+        html2pdf().from(pdfContent).set({
+          margin: [0.2, 0.15, 0.2, 0.15],
+          filename: 'SkyDash_KaraKutu_Telemetri_Raporu.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        }).save().then(function() {
+          if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+        });
+      }, 600);
+    }
+
+    // Android WebAppInterface Bridge
+    function updateData(data) {
+      if (typeof data === "string") {
+        data = JSON.parse(data);
+      }
+
+      // 1. Status Bar updates
+      document.getElementById('top-soc').innerText = "⚡ %" + data.soc + " SOC";
+      document.getElementById('top-range').innerText = data.range + " km";
+      
+      const now = new Date();
+      const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+      document.getElementById('top-date').innerText = now.getDate() + " " + monthNames[now.getMonth()].toUpperCase() + " " + now.getFullYear();
+      document.getElementById('top-time').innerText = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+      
+      // Update ADB connection status
+      const adbBadge = document.getElementById('top-adb');
+      if (data.ignitionState >= 0) {
+        adbBadge.innerText = "LocalADB OK";
+        adbBadge.style.color = "var(--accent-teal)";
+      } else {
+        adbBadge.innerText = "LocalADB OFFLINE";
+        adbBadge.style.color = "var(--danger-red)";
+      }
+
+      // 2. Cockpit screen updates
+      document.getElementById('bat-soc').innerText = "%" + data.soc;
+      document.getElementById('bat-temp').innerText = data.insideTemp.toFixed(1) + " °C"; // Using insideTemp or battery temp
+      document.getElementById('cabin-temps').innerText = data.insideTemp.toFixed(1) + "°C / " + data.outsideTemp.toFixed(1) + "°C";
+      document.getElementById('hvac-target').innerText = data.hvacTargetTemp.toFixed(1) + "°C";
+      
+      const hvacAutoBadge = document.getElementById('hvac-auto-badge');
+      if (data.hvacAuto) {
+        hvacAutoBadge.innerText = "AUTO AÇIK";
+        hvacAutoBadge.style.background = "rgba(90,216,194,0.15)";
+        hvacAutoBadge.style.color = "var(--accent-teal)";
+      } else {
+        hvacAutoBadge.innerText = "AUTO KAPALI";
+        hvacAutoBadge.style.background = "rgba(255,255,255,0.05)";
+        hvacAutoBadge.style.color = "var(--text-muted)";
+      }
+
+      document.getElementById('hvac-fan').innerText = data.hvacFanSpeed + " / 7" + (data.hvacAuto ? " (Otomatik)" : "");
+      
+      // Regen details
+      document.getElementById('regen-power').innerText = "%" + data.regenLevel;
+      document.getElementById('regen-gained').innerHTML = "+" + parseFloat(data.trips.A.energyUsed).toFixed(1) + '<span style="font-size: 22px; margin-left: 6px; color: rgba(255, 255, 255, 0.4);">kWh</span>';
+
+      // Simulated instant power draw
+      const powerKw = data.speed > 0 ? (data.speed * 0.25) : 0.0;
+      document.getElementById('instant-power').innerText = "Anlık Güç: " + (powerKw >= 0 ? "+" : "") + powerKw.toFixed(1) + " kW";
+      
+      // Power bar visual fill
+      const fillBar = document.getElementById('power-bar-fill');
+      if (fillBar) {
+        const percentage = Math.min(Math.max((powerKw + 30) / 120 * 100, 0), 100);
+        fillBar.style.left = "50%";
+        fillBar.style.width = Math.abs(percentage - 50) + "%";
+        if (powerKw < 0) {
+          fillBar.style.left = percentage + "%";
+          fillBar.style.backgroundColor = "var(--accent-teal)";
+        } else {
+          fillBar.style.left = "50%";
+          fillBar.style.backgroundColor = "var(--danger-red)";
+        }
+      }
+
+      // Bottom trip strip
+      document.getElementById('strip-distance').innerText = data.trips.A.distance;
+      document.getElementById('strip-duration').innerText = data.trips.A.activeDuration;
+      document.getElementById('strip-energy').innerText = data.trips.A.energyUsed;
+      document.getElementById('strip-avg').innerText = data.trips.A.avgConsumption;
+
+      // 3. Trips page cards updates
+      ["A", "B", "C"].forEach(function(id) {
+        const trip = data.trips[id];
+        const lid = id.toLowerCase();
+        
+        document.getElementById('trip' + lid + '-distance').innerText = trip.distance;
+        document.getElementById('trip' + lid + '-soc').innerText = trip.socDelta;
+        document.getElementById('trip' + lid + '-ac').innerText = trip.energyUsed;
+        document.getElementById('trip' + lid + '-drive').innerText = "0.00 kWh";
+        document.getElementById('trip' + lid + '-total').innerText = trip.energyUsed;
+        document.getElementById('trip' + lid + '-cost').innerText = trip.cost;
+        document.getElementById('trip' + lid + '-cost-per-km').innerText = trip.costPerKm;
+        document.getElementById('trip' + lid + '-avg').innerText = trip.avgConsumption;
+        document.getElementById('trip' + lid + '-avg-speed').innerText = trip.avgSpeed;
+        document.getElementById('trip' + lid + '-active-time').innerText = trip.activeDuration;
+        document.getElementById('trip' + lid + '-park-time').innerText = trip.parkDuration;
+      });
+
+      // 4. Past charges list
+      let chargesHtml = '';
+      data.pastCharges.forEach(function(ch) {
+        chargesHtml += `<div class="list-row">
+          <div>${ch.date}</div>
+          <div style="color:${ch.type === 'AC' ? 'var(--accent-teal)' : 'var(--accent-amber)'};">${ch.type}</div>
+          <div>${ch.soc}</div>
+          <div>${ch.energy}</div>
+          <div>${ch.cost}</div>
+          <button class="btn-view-graph" onclick="openChart('charge')">⚡ Telemetriyi Aç</button>
+        </div>`;
+      });
+      document.getElementById('past-charges-list').innerHTML = chargesHtml || '<div style="padding:15px; color:var(--text-muted); text-align:center;">Henüz şarj kaydı yok</div>';
+
+      // 5. Past trips list
+      let tripsHtml = '';
+      data.pastTrips.forEach(function(tr) {
+        tripsHtml += `<div class="list-row">
+          <div>${tr.date}</div>
+          <div>${tr.distance}</div>
+          <div>${tr.duration}</div>
+          <div>${tr.energy}</div>
+          <div style="color:var(--accent-teal);">${tr.avg}</div>
+          <button class="btn-view-graph" onclick="openChartForTrip(${tr.id})">📊 Grafikleri Aç</button>
+        </div>`;
+      });
+      document.getElementById('past-trips-list').innerHTML = tripsHtml || '<div style="padding:15px; color:var(--text-muted); text-align:center;">Henüz sürüş kaydı yok</div>';
+    }
+
+    function resetTrip(id) {
+      if (confirm("Trip " + id + " sıfırlanacak. Emin misiniz?")) {
+        if (window.Android && window.Android.resetTrip) {
+          window.Android.resetTrip(id);
+        } else {
+          alert("Trip " + id + " sıfırlandı (Mock)");
+        }
+      }
+    }
+
+    function openChartForTrip(tripId) {
+      document.getElementById('chartModal').classList.add('active');
+      const ctx = document.getElementById('myChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      let telemetryData = [];
+      if (window.Android && window.Android.getBlackBoxTelemetry) {
+        try {
+          const raw = window.Android.getBlackBoxTelemetry(tripId);
+          telemetryData = JSON.parse(raw);
+        } catch(e) {
+          console.error("Error reading telemetry:", e);
+        }
+      }
+
+      // Mock fallback if telemetry is empty
+      if (telemetryData.length === 0) {
+        telemetryData = [
+          { time: 0, soc: 78, speed: 0, altitude: 100, motor_temp: 40, cell_diff_mv: 12 },
+          { time: 300, soc: 76, speed: 45, altitude: 120, motor_temp: 48, cell_diff_mv: 15 },
+          { time: 600, soc: 74, speed: 80, altitude: 200, motor_temp: 58, cell_diff_mv: 20 },
+          { time: 900, soc: 70, speed: 120, altitude: 380, motor_temp: 72, cell_diff_mv: 28 },
+          { time: 1200, soc: 64, speed: 50, altitude: 200, motor_temp: 60, cell_diff_mv: 15 },
+          { time: 1500, soc: 58, speed: 0, altitude: 50, motor_temp: 48, cell_diff_mv: 12 }
+        ];
+      }
+
+      const labels = telemetryData.map(d => Math.round(d.time / 60) + " Dk");
+      const socData = telemetryData.map(d => d.soc);
+      const speedData = telemetryData.map(d => d.speed);
+      const altitudeData = telemetryData.map(d => d.altitude);
+      const motorTempData = telemetryData.map(d => d.motor_temp);
+      const cellMvData = telemetryData.map(d => d.cell_diff_mv);
+
+      document.getElementById('modalTitle').innerText = "Sürüş Kara Kutusu (Trip #" + tripId + ")";
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'SOC (%)', data: socData, borderColor: '#5AD8C2', yAxisID: 'y', tension: 0.3 },
+            { label: 'Hız (km/h)', data: speedData, borderColor: '#8E9BAE', yAxisID: 'y', tension: 0.3 },
+            { label: 'Rakım (m)', data: altitudeData, borderColor: '#3B82F6', yAxisID: 'y1', tension: 0.3 },
+            { label: 'Motor Sıcaklığı (°C)', data: motorTempData, borderColor: '#EF4444', yAxisID: 'y1', tension: 0.3 },
+            { label: 'Hücre Farkı (mV)', data: cellMvData, borderColor: '#F0A857', yAxisID: 'y2', borderDash: [5, 5], tension: 0.3 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: 'Süre' } },
+            y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'SOC % / Hız'} },
+            y1: { type: 'linear', display: true, position: 'right', title: {display: true, text: 'Rakım / Sıcaklık'}, grid: {drawOnChartArea: false} },
+            y2: { type: 'linear', display: true, position: 'right', title: {display: true, text: 'Hücre mV Farkı'}, grid: {drawOnChartArea: false} }
+          }
+        }
+      });
+    }
+
+    // Inform Android of page readiness
+    window.onload = function() {
+      if (window.Android && window.Android.onReady) {
+        window.Android.onReady();
+      }
+    };
+  </script>
+</body>
+</html>
