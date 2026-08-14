@@ -535,11 +535,10 @@
       <div class="status-left">
         <div class="badge badge-teal">
           <div class="pulse-dot"></div>
-          <span id="top-soc">⚡ %78 SOC</span>
+          <span id="top-soc">⚡ -- SOC</span>
         </div>
         <div class="badge" style="border-color: rgba(255, 255, 255, 0.15);">
-          <span style="color: var(--text-muted);">Menzil:</span> 
-          <strong id="top-range" style="color:var(--text-main);">420 km</strong>
+          <span style="color: var(--text-muted);">Menzil:</span>            <strong id="top-range" style="color:var(--text-main);">-- km</strong>
         </div>
       </div>
 
@@ -593,11 +592,11 @@
             <div class="card">
               <div class="card-title">
                 <span>BATARYA & HÜCRE SAĞLIĞI</span>
-                <span style="color:var(--text-sub); font-size:10px;">NET KAPASİTE: 68 kWh</span>
+                <span style="color:var(--text-sub); font-size:10px;">NET KAPASİTE: --</span>
               </div>
 
               <div class="battery-circle-container">
-                <div id="bat-soc" class="battery-value">%78</div>
+                <div id="bat-soc" class="battery-value">--</div>
                 <div style="font-size:14px; color:var(--text-muted); font-weight:600;">SOC</div>
               </div>
 
@@ -605,11 +604,11 @@
               <div class="stat-group">
                 <div class="stat-row">
                   <span style="color:var(--text-muted);">Batarya Ort. Sıcaklığı</span>
-                  <span id="bat-temp" class="stat-val" style="color:var(--accent-teal);">24.2 °C</span>
+                  <span id="bat-temp" class="stat-val" style="color:var(--text-muted);">Veri Yok</span>
                 </div>
                 <div class="stat-row">
                   <span style="color:var(--text-muted);">Hücre Sıcaklığı (Min / Max)</span>
-                  <span id="bat-temp-minmax" class="stat-val">23.5°C / 25.0°C</span>
+                  <span id="bat-temp-minmax" class="stat-val" style="color:var(--text-muted);">Veri Yok</span>
                 </div>
               </div>
 
@@ -617,11 +616,11 @@
               <div class="stat-group">
                 <div class="stat-row">
                   <span style="color:var(--text-muted);">Hücre Farkı (Δ Voltaj)</span>
-                  <span id="cell-diff" class="stat-val" style="color:var(--accent-teal);">12 mV</span>
+                  <span id="cell-diff" class="stat-val" style="color:var(--text-muted);">Veri Yok</span>
                 </div>
                 <div class="stat-row">
                   <span style="color:var(--text-muted);">Hücre Voltajı (Min / Max)</span>
-                  <span id="cell-volts-minmax" class="stat-val">3.840V / 3.852V</span>
+                  <span id="cell-volts-minmax" class="stat-val" style="color:var(--text-muted);">Veri Yok</span>
                 </div>
               </div>
 
@@ -629,7 +628,7 @@
               <div class="stat-group">
                 <div class="stat-row">
                   <span style="color:var(--text-muted);">Kalan Enerji</span>
-                  <span id="rem-energy" class="stat-val">53.0 kWh</span>
+                  <span id="rem-energy" class="stat-val" style="color:var(--text-muted);">Veri Yok</span>
                 </div>
               </div>
             </div>
@@ -639,7 +638,7 @@
               
               <div class="mode-section">
                 <div class="mode-big-title">⚡ AKTİF REJEN FRENLEME GÜCÜ</div>
-                <div id="regen-power" class="mode-big-value">%50</div>
+                <div id="regen-power" class="mode-big-value">--</div>
               </div>
               
               <div class="mode-section" style="margin-top: -4px;">
@@ -665,7 +664,12 @@
                   <span>Tüketim (+90 kW)</span>
                 </div>
                 <div style="height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; position:relative;">
-                  <div id="power-bar-fill" style="position:absolute; left:50%; width:0%; height:100%; background:var(--accent-teal); border-radius:4px;"></div>             <!-- Right Card: HVAC & Both Seats (FIX 3: İÇ / DIŞ SICAKLIK Sadeleştirildi) -->
+                  <div id="power-bar-fill" style="position:absolute; left:50%; width:0%; height:100%; background:var(--accent-teal); border-radius:4px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Card: HVAC & Both Seats (FIX 3: İÇ / DIŞ SICAKLIK Sadeleştirildi) -->
             <div class="card">
               <div class="card-title">
                 <span>KABİN & İKLİM / KOLTUKLAR</span>
@@ -1242,10 +1246,10 @@
       }
 
       // 2. Cockpit screen updates
-      document.getElementById('bat-soc').innerText = "%" + data.soc;
-      document.getElementById('bat-temp').innerText = data.insideTemp.toFixed(1) + " °C"; // Using insideTemp or battery temp
-      document.getElementById('cabin-temps').innerText = data.insideTemp.toFixed(1) + "°C / " + data.outsideTemp.toFixed(1) + "°C";
-      document.getElementById('hvac-target').innerText = data.hvacTargetTemp.toFixed(1) + "°C";
+      document.getElementById('bat-soc').innerText = data.soc >= 0 ? ("%" + data.soc) : "--";
+      document.getElementById('bat-temp').innerText = "Veri Yok (OBD)";
+      document.getElementById('cabin-temps').innerText = (data.insideTemp > 0 ? data.insideTemp.toFixed(1) : "--") + "°C / " + (data.outsideTemp > 0 ? data.outsideTemp.toFixed(1) : "--") + "°C";
+      document.getElementById('hvac-target').innerText = data.hvacTargetTemp > 0 ? (data.hvacTargetTemp.toFixed(1) + "°C") : "--";
       
       const hvacAutoBadge = document.getElementById('hvac-auto-badge');
       if (data.hvacAuto) {
@@ -1361,16 +1365,9 @@
         }
       }
 
-      // Mock fallback if telemetry is empty
       if (telemetryData.length === 0) {
-        telemetryData = [
-          { time: 0, soc: 78, speed: 0, altitude: 100, motor_temp: 40, cell_diff_mv: 12 },
-          { time: 300, soc: 76, speed: 45, altitude: 120, motor_temp: 48, cell_diff_mv: 15 },
-          { time: 600, soc: 74, speed: 80, altitude: 200, motor_temp: 58, cell_diff_mv: 20 },
-          { time: 900, soc: 70, speed: 120, altitude: 380, motor_temp: 72, cell_diff_mv: 28 },
-          { time: 1200, soc: 64, speed: 50, altitude: 200, motor_temp: 60, cell_diff_mv: 15 },
-          { time: 1500, soc: 58, speed: 0, altitude: 50, motor_temp: 48, cell_diff_mv: 12 }
-        ];
+        document.getElementById('modalTitle').innerText = "Sürüş Kara Kutusu (Trip #" + tripId + ") - Kayıt Yok";
+        return;
       }
 
       const labels = telemetryData.map(d => Math.round(d.time / 60) + " Dk");
