@@ -26,7 +26,7 @@ class LocalAdbClient(private val context: Context) {
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
     private var lastRemoteId = 0
-    private var isConnected = false
+    internal var isConnected = false
 
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
         // Don't reconnect if already connected
