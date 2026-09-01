@@ -1237,7 +1237,7 @@
       
       // Update ADB connection status
       const adbBadge = document.getElementById('top-adb');
-      if (data.ignitionState >= 0) {
+      if (data.adbConnected === true) {
         adbBadge.innerText = "LocalADB OK";
         adbBadge.style.color = "var(--accent-teal)";
       } else {
