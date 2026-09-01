@@ -109,7 +109,7 @@ class VehicleDataService : Service() {
                     val hvacData = HvacProvider.queryHvac(this@VehicleDataService)
 
                     // 2. Query VehicleHAL dumpsys via LocalADB
-                    val rawData = adbClient.executeCommand("dumpsys car_service")
+                    val rawData = adbClient.executeCommand("dumpsys car_service | grep lastEvent")
 
                     // 3. Parse snapshot (if rawData is empty, parser uses defaults/hvacData)
                     val snapshot = CarServiceParser.parse(rawData, hvacData)
@@ -190,6 +190,7 @@ class VehicleDataService : Service() {
 
         // Construct full UI model
         val dataMap = mapOf(
+            "adbConnected" to adbClient.isConnected,
             "soc" to snapshot.soc,
             "range" to snapshot.range,
             "speed" to snapshot.speed,
