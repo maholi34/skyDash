@@ -91,6 +91,14 @@ class LocalAdbClient(private val context: Context) {
                 }
             }
 
+            // Bağlantı onaylandıktan sonra soket üzerinde unutulmuş
+            // (banner gibi) baytlar varsa hepsini temizle.
+            inputStream?.let { stream ->
+                while (stream.available() > 0) {
+                    stream.read()
+                }
+            }
+
             if (msg.command == A_CNXN) {
                 Log.i(TAG, "ADB handshake successful!")
                 isConnected = true
