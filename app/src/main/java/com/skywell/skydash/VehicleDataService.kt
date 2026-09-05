@@ -44,6 +44,7 @@ class VehicleDataService : Service() {
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
     private val gson = Gson()
+    private var lastDebugInfo: String = "Henüz veri yok"
 
     var onDataUpdated: ((String) -> Unit)? = null
 
@@ -110,6 +111,7 @@ class VehicleDataService : Service() {
 
                     // 2. Query VehicleHAL dumpsys via LocalADB
                     val rawData = adbClient.executeCommand("dumpsys car_service | grep lastEvent")
+                    lastDebugInfo = if (rawData.startsWith("HATA:")) rawData else "OK (${rawData.length} karakter alındı)"
 
                     // 3. Parse snapshot (if rawData is empty, parser uses defaults/hvacData)
                     val snapshot = CarServiceParser.parse(rawData, hvacData)
@@ -205,6 +207,7 @@ class VehicleDataService : Service() {
             "regenLevel" to snapshot.regenLevel,
             "chargeState" to snapshot.chargeState,
             "ignitionState" to snapshot.ignitionState,
+            "debugInfo" to lastDebugInfo,
             "trips" to mapOf(
                 "A" to serializeTrip(tripManager.tripA),
                 "B" to serializeTrip(tripManager.tripB),
