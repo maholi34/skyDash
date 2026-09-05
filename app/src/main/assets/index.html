@@ -551,6 +551,7 @@
 
       <div class="status-right">
         <div id="top-adb" class="badge" style="color: var(--accent-teal);">LocalADB OK</div>
+        <div id="top-debug" style="font-size:10px; color:var(--text-sub); max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
       </div>
     </div>
 
@@ -1244,6 +1245,9 @@
         adbBadge.innerText = "LocalADB OFFLINE";
         adbBadge.style.color = "var(--danger-red)";
       }
+
+      const debugEl = document.getElementById('top-debug');
+      if (debugEl) debugEl.innerText = data.debugInfo || "";
 
       // 2. Cockpit screen updates
       document.getElementById('bat-soc').innerText = data.soc >= 0 ? ("%" + data.soc) : "--";
