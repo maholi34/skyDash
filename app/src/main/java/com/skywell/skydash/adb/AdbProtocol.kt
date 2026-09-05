@@ -46,7 +46,8 @@ object AdbProtocol {
         val magic = buffer.int
 
         if (command xor -0x1 != magic) {
-            throw IllegalArgumentException("Invalid ADB message magic check!")
+            val hex = headerBytes.joinToString(" ") { "%02x".format(it) }
+            throw IllegalArgumentException("Invalid ADB message magic check! RAW: $hex")
         }
 
         // We return message with empty data first, payload will be read separately
